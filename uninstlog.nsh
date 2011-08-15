@@ -1,13 +1,20 @@
-;uninstalllog.nsh
+;uninstlog.nsh
 /*
 Adapted from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
+Last modified 8/15/11
+
 Modifications:
+
+8/15/11 Added note about AddItem needing to be called before the command it applies to.8/15/11 by GaryC:
+Added file existence checks in more macros.  Added check of $UninstLogAlwaysLog to macros that write files.
+Added note about not working before SetCompressor /SOLID LZMA.
+8/15/11 Initial modifications from WIKI code by GaryC:
 In UninstallLog changed SetOutPath so that it doesn't log the path if it already exists.
 In WriteRegDWORD changed WriteRegStr to WriteRegDWORD.
 Converted uninstallLog to check file date and size of selected files and offer to not uninstall if files have been changed.
 Made uninstall code into a function, moved to end of header.  
-Moved close and delete of log file to right after it has been read4  This allows the INSTDIR to be removed.
+Moved close and delete of log file to right after it has been read.  This allows the INSTDIR to be removed.
 Made section -openlogfile into macro UNINSTLOG_OPENINSTALL.
 Added macro UNINSTLOG_CLOSEINSTALL to close log file, don't think it was done in original code.
 Added ifdef INSTALLLOGINCLUDED around header file contents.
@@ -27,7 +34,8 @@ This means that you must define these and use them in the path of any ${WriteReg
 
 To use:
 !include this file at the top of your scrip.
-Define REG_ROOT, and REG_APP_PATH and/or REG_UNINSTALL_pATH if you want to use the ${WriteRegStr} or ${WriteRegDWORD}.
+(Note: it gets an error if it is before "SetCompressor /SOLID LZMA": "Error: can't change compressor after data already got compressed or header already changed!".)
+Define REG_ROOT, and REG_APP_PATH and/or REG_UNINSTALL_PATH if you want to use the ${WriteRegStr} or ${WriteRegDWORD}.
 Start and end each install section like this:
 section "Install section"
 !insertmacro UNINSTLOG_OPENINSTALL
@@ -42,7 +50,7 @@ In your uninstall section do:
 Note that this will push one entry on the stack for every entry in the log.
 
 The following commands are provided, most of them simple forms of the similar NSIS commands:
-${AddItem} Path --  adds a file or directory when the provided commands won't do the job.
+${AddItem} Path --  adds a file or directory when the provided commands won't do the job.  Does not add the item if it exists, so you need to call this before the command that creates it.
 ${File} Path FileName -- path is path on source machine, must be empty or end with backspash.
 ${CreateShortcut} FilePath FilePointer Pamameters Icon IconIndex -- create shortcut FilePath that links to FilePointer.
 ${CopyFiles} source Dest - use full paths.
@@ -190,6 +198,8 @@ ${UnStrTok}
 
 ;AddItem macro-- Writes an item to the log, for times when you need options the macros don't support.
   !macro AddItem Path
+    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
+    IfFileExists "${Path}" +3 ;if it exists we don't log it.
     StrCmp $UninstLog "" +2
     FileWrite $UninstLog "${Path}$\r$\n"
   !macroend
@@ -197,6 +207,8 @@ ${UnStrTok}
 ;AddItemDated macro.  like AddItem but allows you to add date and size information to the entry so the uninstaller can tell if the file has been modified.
   ;Writes path with date-size appended.  path must exist.
   !macro AddItemDated Path
+    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
+    IfFileExists "${Path}" +9 ;if it exists we don't log it.
     StrCmp $UninstLog "" +8 ;bail if uninstall log closed
     push $0
     push $1
@@ -213,6 +225,7 @@ ${UnStrTok}
   ;Filepath is path on machine generating installer, must be empty or terminated with backslash.
   ;Use regular file command and AddItem macro for anything more exhotic.
   !macro File FilePath FileName
+    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
      IfFileExists "$OUTDIR\${FileName}" +3
      StrCmp $UninstLog "" +2
      ;detailprint "File: checking existence of $OUTDIR\${FileName}, $$UninstLog=$UninstLog" ; debug
@@ -234,7 +247,7 @@ ${UnStrTok}
     StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
     IfFileExists "$OUTDIR\${FileName}" +3 ;if it exists we don't log it.
       strCmp $UninstLog "" +2 ; if log file not opened don't log
-        strCpy $2 1 ;log file
+        strCpy $2 1 ;set flag to log file
     File "${FilePath}${FileName}"
     StrCmp $2 "" +4 ;skip logging
       StrCpy $0 "$OUTDIR\${FileName}" ;file on target system is here
@@ -284,14 +297,23 @@ ${UnStrTok}
   
 
 ;CreateShortcut macro
-  !macro CreateShortcut FilePath FilePointer Pamameters Icon IconIndex
+  !macro CreateShortcut FilePath FilePointer Parameters Icon IconIndex
+    !ifdef UNINSTLOGDEBUG ; debug
+    StrCpy $0 "doesn't"
+    IfFileExists "${FilePath}" 0 +2
+    StrCpy $0 "does"
+    DetailPrint 'CreateShortcut: Checking existence of ${FilePath} which $0 exist.' ; debug
+    !endif ; debug
+    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
+    IfFileExists "${FilePath}" +3 ;if it exists we don't log it.
     StrCmp $UninstLog "" +2
       FileWrite $UninstLog "${FilePath}$\r$\n"
-    CreateShortcut "${FilePath}" "${FilePointer}" "${Pamameters}" "${Icon}" "${IconIndex}"
+    CreateShortcut "${FilePath}" "${FilePointer}" "${Parameters}" "${Icon}" "${IconIndex}"
   !macroend
  
 ;Copy files macro
   !macro CopyFiles SourcePath DestPath
+    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
     IfFileExists "${DestPath}" +3
       StrCmp $UninstLog "" +2
         FileWrite $UninstLog "${DestPath}$\r$\n"
@@ -300,6 +322,7 @@ ${UnStrTok}
  
 ;Rename macro
   !macro Rename SourcePath DestPath
+    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
     IfFileExists "${DestPath}" +3
       StrCmp $UninstLog "" +2
         FileWrite $UninstLog "${DestPath}$\r$\n"
@@ -308,9 +331,11 @@ ${UnStrTok}
  
 ;CreateDirectory macro
   !macro CreateDirectory Path
-    CreateDirectory "${Path}"
+    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
+    IfFileExists "${Path}\*.*" +3 ;if it exists we don't log it.
     StrCmp $UninstLog "" +2
       FileWrite $UninstLog "${Path}$\r$\n"
+    CreateDirectory "${Path}"
   !macroend
  
 /*
@@ -327,7 +352,8 @@ ${UnStrTok}
 ;Modified to not log Path if it already exists.--GaryC
 ;If you use this macro, the path you specify will be removed by the uninstaller if it does not already exist!
   !macro SetOutPath Path
-    IfFileExists ${Path} +3
+    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
+    IfFileExists "${Path}\*.*" +3
       StrCmp $UninstLog "" +2
         FileWrite $UninstLog "${Path}$\r$\n"
     SetOutPath "${Path}"
@@ -335,9 +361,11 @@ ${UnStrTok}
  
 ;WriteUninstaller macro
   !macro WriteUninstaller Path
-    WriteUninstaller "${Path}"
+    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
+    IfFileExists "${Path}" +3 ;if it exists we don't log it.
     StrCmp $UninstLog "" +2
       FileWrite $UninstLog "${Path}$\r$\n"
+    WriteUninstaller "${Path}"
   !macroend
 
 ;WriteRegStr macro
