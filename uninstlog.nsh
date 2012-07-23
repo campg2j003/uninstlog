@@ -2,11 +2,14 @@
 /*
 Adapted from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
-Last modified 8/15/11
+Last modified 7/23/12
 
 Modifications:
 
-8/15/11 Added note about AddItem needing to be called before the command it applies to.8/15/11 by GaryC:
+7/23/12 Fixed typos.
+Macro AddItemAlways added sometime earlier, probably before or around 8/15/11.
+8/15/11 Added note about AddItem needing to be called before the command it applies to.
+8/15/11 by GaryC:
 Added file existence checks in more macros.  Added check of $UninstLogAlwaysLog to macros that write files.
 Added note about not working before SetCompressor /SOLID LZMA.
 8/15/11 Initial modifications from WIKI code by GaryC:
@@ -45,12 +48,17 @@ sectionend
 
 When the log is closed the commands will be executed but not logged.
 
+If you want the $INSTDIR to be removed automatically, you need to place 
+${AddItemAlways} "$INSTDIR"
+after you initially open the log.  This is because the $INSTDIR is already created at the time INSTLOG_OPENINSTALL is called, so it won't automatically be logged.  UNINSTLOG_OPENINSTALL does not automatically log it so that you don't add a directory automatically if you close and reopen a new install block.  (Automatically writing $INSTDIR on open makes a messy log but it might be okay since there are still files in the directory.)  If you run the installer again to add additional files, it will again write the $INSTDIR to the log.
+
 In your uninstall section do:
 !insertmacro UNINSTLOG_UNINSTALL
 Note that this will push one entry on the stack for every entry in the log.
 
 The following commands are provided, most of them simple forms of the similar NSIS commands:
 ${AddItem} Path --  adds a file or directory when the provided commands won't do the job.  Does not add the item if it exists, so you need to call this before the command that creates it.
+${AddItemAlways} -- Like AddItem but adds item even if it exists.
 ${File} Path FileName -- path is path on source machine, must be empty or end with backspash.
 ${CreateShortcut} FilePath FilePointer Pamameters Icon IconIndex -- create shortcut FilePath that links to FilePointer.
 ${CopyFiles} source Dest - use full paths.
@@ -88,7 +96,9 @@ ${UnStrTok}
 
 (This was discovered by inspection.)
 
-The project for which I made this header file uses ${AddItem}, ${AddItemDated}, ${File}, ${FileDated}, ${CreateDirectory}, ${CreateShortcut}, ${SetOutPath}, and ${WriteUninstaller}.  I have retained the other commands but I have not tested them.
+The project for which I made this header file uses ${AddItem}, ${AddItemDated}, ${File}, ${FileDated}, ${CreateDirectory}, ${CreateShortcut}, ${SetOutPath}, and ${WriteUninstaller}.  I have retained the other commands but I have not tested them much.
+
+Issue with ${AddItemDated}: If ${AddItemDated} follows the command that creates its file then it won't log unless UninstLogAlwaysLog is on.  If it precedes the command, the date-size stamp will be empty because it doesn't exist yet.
 
 Example:
 !include "uninstlog.nsh"
@@ -111,6 +121,7 @@ UninstPage instfiles
 
 section "-install"
 !insertmacro UNINSTLOG_OPENINSTALL
+${AddItemAlways} "$INSTDIR"
 ${SetOutPath} "$INSTDIR"
 ${FileDated} "" "uninstlog.nsh"
 ${File} "${NSISDIR}\Include\" "strfunc.nsh"
@@ -124,8 +135,8 @@ section /O "Optional stuff, copy and rename"
 !insertmacro UNINSTLOG_OPENINSTALL
 ${CreateDirectory} "$INSTDIR\optional" ;will be logged
 ${SetOutPath} "$INSTDIR\optional" ;will not be logged because it already exists
-File /oname=something.nsh "${NSISDIR}\include\sections.nsh"
 ${AddItem} "$OUTDIR\something.nsh"
+File /oname=something.nsh "${NSISDIR}\include\sections.nsh"
 ${CopyFiles} "$OUTDIR\something.nsh" "$OUTDIR\somethingelse.nsh" ;will be logged, but...
 ${Rename} "$OUTDIR\somethingelse.nsh" "$OUTDIR\somethingelse.dat"
 !insertmacro UNINSTLOG_CLOSEINSTALL
@@ -204,6 +215,14 @@ ${UnStrTok}
     FileWrite $UninstLog "${Path}$\r$\n"
   !macroend
  
+;AddItemAlways - Like AddItem but turns on $UninstLogAlwaysLog and restores it afterwards.
+!macro AddItemAlways Path
+push $UninstLogAlwaysLog
+StrCpy $UninstLogAlwaysLog "1"
+!insertmacro AddItem ${Path}
+pop $UninstLogAlwaysLog
+!macroend
+
 ;AddItemDated macro.  like AddItem but allows you to add date and size information to the entry so the uninstaller can tell if the file has been modified.
   ;Writes path with date-size appended.  path must exist.
   !macro AddItemDated Path
@@ -260,7 +279,7 @@ ${UnStrTok}
   !macroend
 
   ;$0 - (in) file path (if it is a path it is so on the source system)
-  ;$1 - (out) date-size yyyymmddhhmmss|size, where | is the value uf ${UNINSTLOGDSEP}.
+  ;$1 - (out) date-size yyyymmddhhmmss|size, where | is the value of ${UNINSTLOGDSEP}.
   ; We use a macro so we can get an install and uninstall version.  Prefix is either "" or "un."
   !macro UninstLogInsertMakeDateSize prefix
   function ${prefix}UninstLogMakeDateSize
@@ -385,9 +404,12 @@ ${UnStrTok}
     WriteRegDWord "${RegRoot}" "${UnInstallPath}" "${Key}" "${Value}"
   !macroend
 
-;Before sections (add to header file)
+;Defines for commands
   ;AddItem macro
     !define AddItem "!insertmacro AddItem"
+ 
+  ;AddItemAlways macro
+    !define AddItemAlways "!insertmacro AddItemAlways"
  
   ;AddItemDated macro
     !define AddItemDated "!insertmacro AddItemDated"
