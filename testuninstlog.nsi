@@ -1,6 +1,11 @@
+/*
+7/24/12 Added section to test ${File} with wildcards.
+*/
+
 !include "uninstlog.nsh"
 !define REG_ROOT "HKLM"
 !define REG_UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\testuninstlog"
+!define SHORTCUTNAME "Uninstall testuninstlog"
 installdir "$PROGRAMFILES\testuninstlog"
 OutFile "testuninstlog.exe"
 Name "Test Uninstlog.nsh"
@@ -8,7 +13,7 @@ RequestExecutionLevel user
 ShowInstDetails show
 ShowUninstDetails show
 
-ComponentText "This demonstrates the uninstlog.nsh header file which provides logging of installed files.  File uninstlog.nsh has a date stamp.  There is a shortcut on the desktop to uninstall this test."
+ComponentText "This demonstrates the uninstlog.nsh header file which provides logging of installed files.  File uninstlog.nsh has a date stamp.  The shortcut ${SHORTCUTNAME} on the desktop will uninstall this test."
 page components
 page Directory
 page InstFiles
@@ -22,7 +27,7 @@ ${AddItemAlways} "$INSTDIR"
 ${SetOutPath} "$INSTDIR"
 ${FileDated} "" "uninstlog.nsh"
 ${File} "${NSISDIR}\Include\" "strfunc.nsh"
-${CreateShortcut} "$DESKTOP\Uninstall testuninstlog.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+${CreateShortcut} "$DESKTOP\${SHORTCUTNAME}.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
 ${WriteUninstaller} "$INSTDIR\uninstall.exe"
 ${WriteRegStr} ${rEG_ROOT} "${REG_UNINSTALL_PaTH}" "UninstallString" "$INSTDIR\uninstall.exe"
 !insertmacro UNINSTLOG_CLOSEINSTALL
@@ -58,6 +63,14 @@ sleep 1000
 fileopen $0 "uninstlog.nsh" a
 filewrite $0 ";Appended by update test.$\r$\n"
 fileclose $0
+!insertmacro UNINSTLOG_CLOSEINSTALL
+sectionend
+
+section /O "Test wildcards"
+!insertmacro UNINSTLOG_OPENINSTALL
+${CreateDirectory} "$INSTDIR\wildcard" ;will be logged
+${SetOutPath} "$INSTDIR\wildcard" ;will not be logged because it already exists
+${File} "${NSISDIR}\include\" "*.nsh"
 !insertmacro UNINSTLOG_CLOSEINSTALL
 sectionend
 
