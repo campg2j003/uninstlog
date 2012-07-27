@@ -1,14 +1,20 @@
 ;uninstlog.nsh
 /*
-Adapted from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
+Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
-Last modified 7/23/12
+Version 0.0.2
+Last modified 7/27/2012
 
 Modifications:
 
-7/23/12 Fixed typos.
+7/27/12 by GaryC: Added display of time stamps in modified file messaage.
+7/25/12 by GaryC: Updated documentation.
+Added version number.
+Deleted commented out section marked "was before sections" at end of file.
+7/24/12 Previous saved to HG rev 2.
+7/23/12 by GaryC: Fixed typos.
 Macro AddItemAlways added sometime earlier, probably before or around 8/15/11.
-8/15/11 Added note about AddItem needing to be called before the command it applies to.
+8/15/11 by GaryC: Added note about AddItem needing to be called before the command it applies to.
 8/15/11 by GaryC:
 Added file existence checks in more macros.  Added check of $UninstLogAlwaysLog to macros that write files.
 Added note about not working before SetCompressor /SOLID LZMA.
@@ -20,8 +26,8 @@ Made uninstall code into a function, moved to end of header.
 Moved close and delete of log file to right after it has been read.  This allows the INSTDIR to be removed.
 Made section -openlogfile into macro UNINSTLOG_OPENINSTALL.
 Added macro UNINSTLOG_CLOSEINSTALL to close log file, don't think it was done in original code.
-Added ifdef INSTALLLOGINCLUDED around header file contents.
-In the uninstall section registry key removal code changed UNINSTALLPATH to REG_UNINSTALL_PATH.  Added ifdefs so that if this or REG_APP_PATH are not defined, code for deleting the respective registry paths is not executed.
+Added !ifndef INSTALLLOGINCLUDED around header file contents.
+In the uninstall section registry key removal code changed UNINSTALLPATH to REG_UNINSTALL_PATH.  Added !ifdefs so that if this or REG_APP_PATH are not defined, code for deleting the respective registry paths is not executed.
 Made open install code into a function with macro that calls it.
 Changed all macros so that they don't try to write if the log file is closed.  You can now disable logging by not calling INSTALLOPEN.
 Added initialization call for ${UnStrTok}. Added define UNINSTLOGDEBUG.
@@ -29,11 +35,13 @@ Commented out section to open uninstall log.
 Added variable $UninstLogAlwaysLog to log files even if they already exist.
 Added documentation and example script.
 
+Documentation:
+
 This header file supports the ability to uninstall only the installed files.
 
 It expects the following defines:
 REG_ROOT, REG_APP_PATH, and REG_UNINSTALL_pATH.  If either of the latter two are undefined these registry keys won't be deleted even if they appear in the log file.
-This means that you must define these and use them in the path of any ${WriteReg...} calls to make them be deleted.  If there were an installed file with the same name as these values that was installed but had been deleted before the uninstall, it could cause these keys to be deleted unintentionally.  (I presume that's why the uninstaller code checks for these values before removing them-- otherwise any file in the log that doesn't exist on the system would be interpreted as a registry key to delete.)
+
 
 To use:
 !include this file at the top of your scrip.
@@ -73,7 +81,7 @@ ${FileDated} -- same as ItemDated for the ${File} command.
 
 Uses the following additional defines:
 UninstLog -- name of the log file, defaults to uninstall.log.  You can define this just before calling UNINSTLOG_OPENINSTALL and UNINSTLOG_UNINSTALL to change the name of the log file.  You could even create separate logs.  You would then need to do more than one UNINSTLOG_UNINSTALL for each log file.  The name will stay defined until you change it.
-UNINSTLOGDSEP-- separator used to separate file path and date-size for ${FileDated} and $ItemDated} macros (|)
+UNINSTLOGDSEP -- separator used to separate file path and date-size for ${FileDated} and $ItemDated} macros (|)
 INSTLOGDEBUG -- Activates debugging messages if defined.
 
 and variables:
@@ -94,11 +102,19 @@ Note that this header uses strfunc.nsh function ${UnStrTok}.  If you also includ
 ${UnStrTok}
 !endif
 
-(This was discovered by inspection.)
+(This was discovered by inspection in v1.09.)
 
-The project for which I made this header file uses ${AddItem}, ${AddItemDated}, ${File}, ${FileDated}, ${CreateDirectory}, ${CreateShortcut}, ${SetOutPath}, and ${WriteUninstaller}.  I have retained the other commands but I have not tested them much.
+A note about wildcards.  Although you can use wildcards in ${File}, ${Rename}, and ${CopyFiles}, it could be dangerous and is not recommended unless you are sure you know what you are doing.  Suppose you do ${File} "*.txt" where the source directory has a few text files, but the directory into which they are installed already contains text files.  The value written to the log will be "*.txt", and this will cause the uninstaller to uninstall all of the .txt files in the folder, including the ones that were already installed.  You can't use wildcards at all with ${FileDated}, although there is no check for this.  (I need a way to run FindFirst/FindNext on the source system to do this.)
 
-Issue with ${AddItemDated}: If ${AddItemDated} follows the command that creates its file then it won't log unless UninstLogAlwaysLog is on.  If it precedes the command, the date-size stamp will be empty because it doesn't exist yet.
+The project for which I modified this header file uses ${AddItem}, ${AddItemAlways}, ${AddItemDated}, ${File}, ${FileDated}, ${CreateDirectory}, ${CreateShortcut}, ${SetOutPath}, and ${WriteUninstaller}.  I have retained the other commands but I have not tested them much.
+
+Bugs/enhancements:
+
+Issue with ${AddItemDated}: If ${AddItemDated} follows the command that creates its file then it won't log unless UninstLogAlwaysLog is on.  If it precedes the command, the date-size stamp will be empty because it doesn't exist yet.  It was not modified to always log regardless of the value of $UninstLogAlwaysLog to make it clear that it is set.
+
+Issue with ${WriteReg...} macros: For these macros to work REG_APP_PATH and REG_UNINSTALL_pATH must be defined, and these are the only registry paths that can be written.  This means that you must define these and use them in the path of any ${WriteReg...} calls to make them be deleted.  If there were an installed file with the same name as these values that was installed but had been deleted before the uninstall, it could cause these keys to be deleted from the registry unintentionally.  (I presume that's why the uninstaller code checks for these values before removing them-- otherwise any file in the log that doesn't exist on the system when uninstalled would be interpreted as a registry key to delete.)
+
+To do: make all macros, variables, and !defines defined by this header start with "UninstLog" to avoid name collisions with other header files.
 
 Example:
 !include "uninstlog.nsh"
@@ -197,8 +213,9 @@ Var UninstLogAlwaysLog ;If nonempty, FileDated logs the file even if it exists.
  
   ;Uninstall log file missing.
     LangString UninstLogMissing ${LANG_ENGLISH} "${UninstLog} not found!$\r$\nUninstallation cannot proceed!"
-    LangString UninstLogModified ${LANG_ENGLISH} "File $R0 has been modified since it was installed.  Do you want to delete it?"
- 
+    LangString UninstLogModified ${LANG_ENGLISH} "File $R0 has been modified since it was installed.  Do you want to delete it?$\r$\nOriginal: $R3$\r$\nCurrent: $R4"
+    LangString UninstLogShowDateSize ${LANG_ENGLISH} "$1 UTC $2 bytes"
+
 ;We need to make sure these functions haven't already been initialized outside this header.  Not documented, found by inspection.
 ;!ifndef StrTokINCLUDED
 ;${StrTok}
@@ -279,7 +296,7 @@ pop $UninstLogAlwaysLog
   !macroend
 
   ;$0 - (in) file path (if it is a path it is so on the source system)
-  ;$1 - (out) date-size yyyymmddhhmmss|size, where | is the value of ${UNINSTLOGDSEP}.
+  ;$1 - (out) date-size yyyymmddhhmmsssize.
   ; We use a macro so we can get an install and uninstall version.  Prefix is either "" or "un."
   !macro UninstLogInsertMakeDateSize prefix
   function ${prefix}UninstLogMakeDateSize
@@ -293,12 +310,11 @@ pop $UninstLogAlwaysLog
      push $R7
      push $R8
      ${GetTime} "$0" "MS" $R0 $R1 $R2 $R3 $R4 $R5 $R6
+     ; Get file size.
      FileOpen $R8 "$0" r
      FileSeek $R8 0 END $R7
      FileClose $R8
-     ;;return something like Outdir\filename|20110804160000|5234
-     ;StrCpy $1 "$R2$R1$R0$R4$R5$R6${UNINSTLOGDSEP}$R7"
-     ;return something like Outdir\filename|201108041600005234
+     ;return something like 201108041600005234 in $1
      StrCpy $1 "$R2$R1$R0$R4$R5$R6$R7"
      pop $R8
      pop $R7
@@ -313,6 +329,20 @@ pop $UninstLogAlwaysLog
   !macroend
   !insertmacro UninstLogInsertMakeDateSize ""
   !insertmacro UninstLogInsertMakeDateSize "un."
+
+  ; Produce a string containing display of a stamp returned by UninstLogMakeDateSize.
+  ; Input and output values are on the stack.
+  function un.UninstLogShowDateSize
+    exch $0
+    push $1
+    push $2
+    strcpy $1 $0 14 ; copy the time part
+    strcpy $2 $0 "" 14 ; copy the size (everything after the time)
+    strcpy $0 "$(UninstLogShowDateSize)"
+    pop $2
+    pop $1
+    exch $0
+  functionend
   
 
 ;CreateShortcut macro
@@ -503,15 +533,16 @@ function un.UninstLogUninstall
     MessageBox MB_OK|MB_ICONSTOP "$(UninstLogMissing)"
       Abort
  
-  ;Push $0
   Push $1
   Push $R0
   Push $R1
   Push $R2
+  push $R3
+  push $R4
   SetFileAttributes "$INSTDIR\$0" NORMAL
   FileOpen $UninstLog "$INSTDIR\$0" r
 
-  ;Set $OUTDIR to something we aren't going to remove so we can delete $INSTDIR.  this works because all of the paths in the log are absolute.
+  ;Set $OUTDIR to something we aren't going to remove so we can delete $INSTDIR.  This works because all of the paths in the log are absolute.
   SetOutPath $PROGRAMFILES
 
   ;Read in the uninstall log and put it on the stack.
@@ -520,7 +551,7 @@ function un.UninstLogUninstall
     ClearErrors
     FileRead $UninstLog $R0
     IntOp $R1 $R1 + 1
-    StrCpy $R0 $R0 -2
+    StrCpy $R0 $R0 -2 ; remove $|R$\N
     Push $R0   
     IfErrors 0 GetLineCount
  
@@ -529,92 +560,94 @@ function un.UninstLogUninstall
   Pop $R0
  
   !ifdef UNINSTLOGDEBUG
-  DetailPrint "Read $R1 log entries" ; debug
+    DetailPrint "Read $R1 log entries" ; debug
   !endif
   LoopRead:
     StrCmp $R1 0 LoopDone
-    Pop $R0
+    Pop $R0 ; log entry
  
     IfFileExists "$R0\*.*" 0 NotDir
       !ifdef UNINSTLOGDEBUG ; debug
-      DetailPrint "Attempting to remove directory $R0" ; debug
+        DetailPrint "Attempting to remove directory $R0" ; debug
       !endif ; debug
       RMDir $R0  #is dir
       !ifdef UNINSTLOGDEBUG ; debug
-      IfErrors 0 +2 ; debug
-      DetailPrint "Error after trying to remove directory $0" ; debug
+        IfErrors 0 +2 ; debug
+          DetailPrint "Error after trying to remove directory $0" ; debug
       !endif ; debug
-    Goto LoopNext
+      Goto LoopNext
     NotDir:
-      ${UnStrTok} $R2 $R0 ${UNINSTLOGDSEP} 1 0 ; date/size
-      ${UnStrTok} $R0 "$R0" ${UNINSTLOGDSEP} 0 0 ;remove date/size from path.
-      !ifdef UNINSTLOGDEBUG
+    ${UnStrTok} $R2 $R0 ${UNINSTLOGDSEP} 1 0 ; date/size, 2nd token
+    ${UnStrTok} $R0 "$R0" ${UNINSTLOGDSEP} 0 0 ;remove date/size from path.
+    !ifdef UNINSTLOGDEBUG
       DetailPrint "After separating time stamp, time stamp=$R2, file=$R0" ; debug
-      !endif
+    !endif
     StrCmp $R2 "" NoDateSize ;Skip call if no timestamp
       push $0
       StrCpy $0 $R0
       Call un.UninstLogMakeDateSize
       pop $0
-      ;$1 contains date/size separated by ${UNINSTLOGDSEP}.
+      ;$1 contains date + size from file, $R2 is same from log entry.
     NoDateSize:
     IfFileExists $R0 0 NotFile
       StrCmp $R2 "" NoDateSize2 ;If this log entry had no date-size, skip compare
       !ifdef UNINSTLOGDEBUG
-      DetailPrint "UninstLog: file $0 has time stamp $1, entry stamp is $R2" ; debug
+        DetailPrint "UninstLog: file $0 has time stamp $1, entry stamp is $R2" ; debug
       !endif
-      StrCmp $R2 $1 +2
-      MessageBox MB_YESNO $(UninstLogModified) IDNO +2
+      StrCmp $R2 $1 DateSizeMatch
+      push $R2 ; log entry stamp
+      call un.UninstLogShowDateSize
+      pop $R3 ; display of log entry stamp
+      push $1 ; current stamp
+      call un.UninstLogShowDateSize
+      pop $R4 ; current file stamp
+        MessageBox MB_YESNO $(UninstLogModified) IDNO NoDelete
+pop $2
+pop $1
+      DateSizeMatch:
       NoDateSize2:
       Delete $R0 #is file
-    Goto LoopNext
+      NoDelete:
+      Goto LoopNext
     NotFile:
     !ifdef REG_APP_PATH
-    StrCmp $R0 "${REG_ROOT} ${REG_APP_PATH}" 0 NotRegAppPath
-      DeleteRegKey ${REG_ROOT} "${REG_APP_PATH}" #is Reg Element
-    Goto LoopNext
+      StrCmp $R0 "${REG_ROOT} ${REG_APP_PATH}" 0 NotRegAppPath
+        DeleteRegKey ${REG_ROOT} "${REG_APP_PATH}" #is Reg Element
+        Goto LoopNext
       NotRegAppPath:
     !endif ; REG_APP_PATH
     !ifdef REG_UNINSTALL_PATH
-    StrCmp $R0 "${REG_ROOT} ${REG_UNINSTALL_PATH}" 0 +2
-      DeleteRegKey ${REG_ROOT} "${UNINSTALL_PATH}" #is Reg Element
+      StrCmp $R0 "${REG_ROOT} ${REG_UNINSTALL_PATH}" 0 +2
+        DeleteRegKey ${REG_ROOT} "${UNINSTALL_PATH}" #is Reg Element
     !endif ; REG_UNINSTALL_PATH 
 
     LoopNext:
     IntOp $R1 $R1 - 1
     Goto LoopRead
   LoopDone:
+  pop $R4
+pop $R3
   Pop $R2
   Pop $R1
   Pop $R0
   Pop $1
-  ;Pop $0
  
   ;Remove registry keys
     ;DeleteRegKey ${REG_ROOT} "${REG_APP_PATH}"
     ;DeleteRegKey ${REG_ROOT} "${REG_UNINSTALL_PATH}"
 functionend
 !macro UNINSTLOG_UNINSTALL
-    !ifndef UninstLog
-      ;Default value if not defined outside.
-      !define UninstLog "uninstall.log"
-    !endif
-push $0
-StrCpy $0 "${UninstLog}"
-call un.UninstLogUninstall
-pop $0
+  !ifndef UninstLog
+    ;Default value if not defined outside.
+    !define UninstLog "uninstall.log"
+  !endif
+  push $0
+  StrCpy $0 "${UninstLog}"
+  call un.UninstLogUninstall
+  pop $0
 !macroend
 
 ;-- end header file addition
-
-;Was Before sections
-/*
-  Section -openlogfile
-  ;or invoke from .oninit
-  !insertmacro UNINSTLOG_OPENINSTALL
-  SectionEnd
-*/
-;-- end was before sections
 
 !endif ; UNINSTALLLOGINCLUDED
 
