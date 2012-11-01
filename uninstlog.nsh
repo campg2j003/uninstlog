@@ -2,11 +2,17 @@
 /*
 Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
-Version 0.0.2
-Last modified 7/27/2012
+Version 0.0.7
+Last modified 10/29/2012
 
 Modifications:
 
+10/29/12 v0.0.7 by GaryC:
+Added documentation to AddItemDated.  Changed logic and comments to make it clear that it does not work unless $UninstLogAlwaysLog is true.  Changed FileExists test so that it does nothing if path does not exist.
+AddItem and AddItemDated now use ${If}... to make logic clearer, added documentation.
+Corrected documentation in UninstLogInsertMakeDateSize.
+In langstring UninstLogMissing changed ${UninstLog} to $0.
+7/27/12 Previous saved to HG rev 6.
 7/27/12 by GaryC: Added display of time stamps in modified file message.
 Moved documentation to another file.
 Removed example script (provided by testuninstlog.nsh).
@@ -56,8 +62,8 @@ Var UninstLogAlwaysLog ;If nonempty, FileDated logs the file even if it exists.
 ;${FileDated} "" "something"
 ;StrCpy $UninstLogAlwaysLog "" ;turn it back off.
  
-  ;Uninstall log file missing.
-    LangString UninstLogMissing ${LANG_ENGLISH} "${UninstLog} not found!$\r$\nUninstallation cannot proceed!"
+  ;Uninstall log file missing, $0 is file name.
+    LangString UninstLogMissing ${LANG_ENGLISH} "$0 not found!$\r$\nUninstallation cannot proceed!"
     LangString UninstLogModified ${LANG_ENGLISH} "File $R0 has been modified since it was installed.  Do you want to delete it?$\r$\nOriginal: $R3$\r$\nCurrent: $R4"
     LangString UninstLogShowDateSize ${LANG_ENGLISH} "$1 UTC $2 bytes"
 
@@ -69,12 +75,15 @@ Var UninstLogAlwaysLog ;If nonempty, FileDated logs the file even if it exists.
 ${UnStrTok}
 !endif
 
-;AddItem macro-- Writes an item to the log, for times when you need options the macros don't support.
+;AddItem macro-- Writes an item to the log, for times when you need options the other macros don't support.
+  ;path -- path of file on target system to be logged.
   !macro AddItem Path
-    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
-    IfFileExists "${Path}" +3 ;if it exists we don't log it.
-    StrCmp $UninstLog "" +2
-    FileWrite $UninstLog "${Path}$\r$\n"
+    ${If} $UninstLogAlwaysLog != "" ; if nonempty, don't check existence.
+    ${OrIfNot} ${FileExists} "${Path}";if it exists we don't log it.
+      ${If} $UninstLog != ""
+        FileWrite $UninstLog "${Path}$\r$\n"
+      ${EndIf} ; if log opened
+    ${EndIf} ; IfNot fileExists
   !macroend
  
 ;AddItemAlways - Like AddItem but turns on $UninstLogAlwaysLog and restores it afterwards.
@@ -86,18 +95,20 @@ pop $UninstLogAlwaysLog
 !macroend
 
 ;AddItemDated macro.  like AddItem but allows you to add date and size information to the entry so the uninstaller can tell if the file has been modified.
-  ;Writes path with date-size appended.  path must exist.
+  ;Writes path with date-size appended.  path references the target system and must exist.  Therefore this macro won't write an entry unless $UninstLogAlwaysLog is true.
   !macro AddItemDated Path
-    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
-    IfFileExists "${Path}" +9 ;if it exists we don't log it.
-    StrCmp $UninstLog "" +8 ;bail if uninstall log closed
-    push $0
-    push $1
-    strCpy $0 ${Path}
-    call UninstLogMakeDateSize
-    FileWrite $UninstLog "${Path}${UNINSTLOGDSEP}$1$\r$\n"
-    pop $1
-    pop $0
+    ${If} $UninstLogAlwaysLog != "" ; if empty, don't log.
+      ;IfFileExists "${Path}" 0 AddItemDatedEnd ;if it does not exist we don't log it.
+      ${If} $UninstLog != "" ;bail if uninstall log closed
+        push $0
+        push $1
+        strCpy $0 ${Path}
+        call UninstLogMakeDateSize
+        FileWrite $UninstLog "${Path}${UNINSTLOGDSEP}$1$\r$\n"
+        pop $1
+        pop $0
+      ${EndIf} ; if log open
+    ${EndIf} ; If always log
   !macroend
 
 ;Consider ItemDated2 macro that would receive path Date (string containing YYYYMMDDhhmmss) size (string containing number of bytes in decimal).
@@ -140,7 +151,7 @@ pop $UninstLogAlwaysLog
     pop $0
   !macroend
 
-  ;$0 - (in) file path (if it is a path it is so on the source system)
+  ;$0 - (in) file path (if it is a path it is so on the target system)
   ;$1 - (out) date-size yyyymmddhhmmsssize.
   ; We use a macro so we can get an install and uninstall version.  Prefix is either "" or "un."
   !macro UninstLogInsertMakeDateSize prefix
