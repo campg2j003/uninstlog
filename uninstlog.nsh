@@ -2,11 +2,13 @@
 /*
 Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
-Version 0.0.7
-Last modified 10/29/2012
+Version 0.1.0
+Last modified 1/9/2016
 
 Modifications:
 
+1/9/16 V0.1.0 by GaryC:
+Moved langstrings to a header file.
 10/29/12 v0.0.7 by GaryC:
 Added documentation to AddItemDated.  Changed logic and comments to make it clear that it does not work unless $UninstLogAlwaysLog is true.  Changed FileExists test so that it does nothing if path does not exist.
 AddItem and AddItemDated now use ${If}... to make logic clearer, added documentation.
@@ -62,10 +64,8 @@ Var UninstLogAlwaysLog ;If nonempty, FileDated logs the file even if it exists.
 ;${FileDated} "" "something"
 ;StrCpy $UninstLogAlwaysLog "" ;turn it back off.
  
-  ;Uninstall log file missing, $0 is file name.
-    LangString UninstLogMissing ${LANG_ENGLISH} "$0 not found!$\r$\nUninstallation cannot proceed!"
-    LangString UninstLogModified ${LANG_ENGLISH} "File $R0 has been modified since it was installed.  Do you want to delete it?$\r$\nOriginal: $R3$\r$\nCurrent: $R4"
-    LangString UninstLogShowDateSize ${LANG_ENGLISH} "$1 UTC $2 bytes"
+;LangStrings
+!include "uninstlog_enu.nsh"
 
 ;We need to make sure these functions haven't already been initialized outside this header.  Not documented, found by inspection.
 ;!ifndef StrTokINCLUDED
