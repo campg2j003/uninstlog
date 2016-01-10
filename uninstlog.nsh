@@ -3,7 +3,7 @@
 Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
 Version 0.1.0
-Last modified 1/9/2016
+Last modified 1/10/2016
 
 Modifications:
 
@@ -64,8 +64,11 @@ Var UninstLogAlwaysLog ;If nonempty, FileDated logs the file even if it exists.
 ;${FileDated} "" "something"
 ;StrCpy $UninstLogAlwaysLog "" ;turn it back off.
  
+LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
+LoadLanguageFile "${NSISDIR}\Contrib\Language files\Spanish.nlf"
 ;LangStrings
 !include "uninstlog_enu.nsh"
+!include "uninstlog_esn.nsh"
 
 ;We need to make sure these functions haven't already been initialized outside this header.  Not documented, found by inspection.
 ;!ifndef StrTokINCLUDED
