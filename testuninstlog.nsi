@@ -2,6 +2,8 @@
 7/24/12 Added section to test ${File} with wildcards.
 */
 
+LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
+LoadLanguageFile "${NSISDIR}\Contrib\Language files\Spanish.nlf"
 !include "uninstlog.nsh"
 !define REG_ROOT "HKLM"
 !define REG_UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\testuninstlog"

@@ -64,8 +64,6 @@ Var UninstLogAlwaysLog ;If nonempty, FileDated logs the file even if it exists.
 ;${FileDated} "" "something"
 ;StrCpy $UninstLogAlwaysLog "" ;turn it back off.
  
-LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
-LoadLanguageFile "${NSISDIR}\Contrib\Language files\Spanish.nlf"
 ;LangStrings
 !include "uninstlog_enu.nsh"
 !include "uninstlog_esn.nsh"
