@@ -8,10 +8,14 @@ REG_ROOT, REG_APP_PATH, and REG_UNINSTALL_PATH.  If either of the latter two are
 
 
 # To use:
-* !include this file at the top of your scrip.
-(Note: it gets an error if it is before "SetCompressor /SOLID LZMA": "Error: can't change compressor after data already got compressed or header already changed!".)
+* At the top of your scrip !include at least one langstring header file and uninstlog.nsh:
+```
+!include "uninstlog_enu.nsh"
+!include "uninstlog.nsh"
+```
+(Note: it gets an error if it is included before "SetCompressor /SOLID LZMA": "Error: can't change compressor after data already got compressed or header already changed!".)
 * Define REG_ROOT, and REG_APP_PATH and/or REG_UNINSTALL_PATH if you want to use ${WriteRegStr} or ${WriteRegDWORD}.
-Start and end each install section like this:
+* Start and end each install section like this:
 ```
 section "Install section"
 !insertmacro UNINSTLOG_OPENINSTALL
@@ -19,7 +23,7 @@ section "Install section"
 !insertmacro UNINSTLOG_CLOSEINSTALL
 sectionend
 ```
-
+* Replace File instructions with the appropriate macros.
 
 When the log is closed the commands will be executed but not logged.
 

@@ -4,6 +4,9 @@
 
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\Spanish.nlf"
+;LangStrings
+!include "uninstlog_enu.nsh"
+!include "uninstlog_esn.nsh"
 !include "uninstlog.nsh"
 !define REG_ROOT "HKLM"
 !define REG_UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\testuninstlog"

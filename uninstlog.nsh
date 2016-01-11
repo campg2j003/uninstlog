@@ -63,10 +63,6 @@ Var UninstLogAlwaysLog ;If nonempty, FileDated logs the file even if it exists.
 ;StrCpy $UninstLogAlwaysLog 1
 ;${FileDated} "" "something"
 ;StrCpy $UninstLogAlwaysLog "" ;turn it back off.
- 
-;LangStrings
-!include "uninstlog_enu.nsh"
-!include "uninstlog_esn.nsh"
 
 ;We need to make sure these functions haven't already been initialized outside this header.  Not documented, found by inspection.
 ;!ifndef StrTokINCLUDED
