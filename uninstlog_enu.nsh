@@ -3,6 +3,8 @@ English messages for uninstlog.nsh V0.1.0 (updated 1/10/2016)
 This file last updated 1/10/16.
 */
 
+!ifndef __UNINSTLOG_ENU_INCLUDED
+  !define __UNINSTLOG_ENU_INCLUDED
 ;Uninstall log file missing, $0 is file name.
 LangString UninstLogMissing ${LANG_ENGLISH} "$0 not found!$\r$\nUninstallation cannot proceed!"
 
@@ -11,3 +13,5 @@ LangString UninstLogModified ${LANG_ENGLISH} "File $R0 has been modified since i
 
 ;Displays a files timestamp and size.  $1 = timestamp, $2 = size in bytes.
 LangString UninstLogShowDateSize ${LANG_ENGLISH} "$1 UTC $2 bytes"
+
+!EndIf ;__UNINSTLOG_ENU_INCLUDED
