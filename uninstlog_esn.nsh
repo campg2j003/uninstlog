@@ -5,6 +5,9 @@ This file last updated 1/10/16.
 Translated by .
 */
 
+!ifndef __UNINSTLOG_ESN_INCLUDED
+  !define __UNINSTLOG_ESN_INCLUDED
+  
 ;Uninstall log file missing, $0 is file name.
 LangString UninstLogMissing ${LANG_SPANISH} "$0 not found!$\r$\nUninstallation cannot proceed!"
 
@@ -13,3 +16,5 @@ LangString UninstLogModified ${LANG_SPANISH} "File $R0 has been modified since i
 
 ;Displays a files timestamp and size.  $1 = timestamp, $2 = size in bytes.
 LangString UninstLogShowDateSize ${LANG_SPANISH} "$1 UTC $2 bytes"
+
+!endif ;__UNINSTLOG_ESN_INCLUDED
