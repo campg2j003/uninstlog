@@ -3,47 +3,9 @@
 Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
 Version 0.1.0
-Last modified 1/10/2016
+Last modified 1/13/2016
 
 Modifications:
-
-1/9/16 V0.1.0 by GaryC:
-Moved langstrings to a header file.
-10/29/12 v0.0.7 by GaryC:
-Added documentation to AddItemDated.  Changed logic and comments to make it clear that it does not work unless $UninstLogAlwaysLog is true.  Changed FileExists test so that it does nothing if path does not exist.
-AddItem and AddItemDated now use ${If}... to make logic clearer, added documentation.
-Corrected documentation in UninstLogInsertMakeDateSize.
-In langstring UninstLogMissing changed ${UninstLog} to $0.
-7/27/12 Previous saved to HG rev 6.
-7/27/12 by GaryC: Added display of time stamps in modified file message.
-Moved documentation to another file.
-Removed example script (provided by testuninstlog.nsh).
-7/25/12 by GaryC: Updated documentation.
-Added version number.
-Deleted commented out section marked "was before sections" at end of file.
-7/24/12 Previous saved to HG rev 2.
-7/23/12 by GaryC: Fixed typos.
-Macro AddItemAlways added sometime earlier, probably before or around 8/15/11.
-8/15/11 by GaryC: Added note about AddItem needing to be called before the command it applies to.
-8/15/11 by GaryC:
-Added file existence checks in more macros.  Added check of $UninstLogAlwaysLog to macros that write files.
-Added note about not working before SetCompressor /SOLID LZMA.
-8/15/11 Initial modifications from WIKI code by GaryC:
-In UninstallLog changed SetOutPath so that it doesn't log the path if it already exists.
-In WriteRegDWORD changed WriteRegStr to WriteRegDWORD.
-Converted uninstallLog to check file date and size of selected files and offer to not uninstall if files have been changed.
-Made uninstall code into a function, moved to end of header.  
-Moved close and delete of log file to right after it has been read.  This allows the INSTDIR to be removed.
-Made section -openlogfile into macro UNINSTLOG_OPENINSTALL.
-Added macro UNINSTLOG_CLOSEINSTALL to close log file, don't think it was done in original code.
-Added !ifndef INSTALLLOGINCLUDED around header file contents.
-In the uninstall section registry key removal code changed UNINSTALLPATH to REG_UNINSTALL_PATH.  Added !ifdefs so that if this or REG_APP_PATH are not defined, code for deleting the respective registry paths is not executed.
-Made open install code into a function with macro that calls it.
-Changed all macros so that they don't try to write if the log file is closed.  You can now disable logging by not calling INSTALLOPEN.
-Added initialization call for ${UnStrTok}. Added define UNINSTLOGDEBUG.
-Commented out section to open uninstall log.
-Added variable $UninstLogAlwaysLog to log files even if they already exist.
-Added documentation and example script.
 
 */
 
