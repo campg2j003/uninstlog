@@ -3,7 +3,7 @@
 Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
 Version 0.1.1
-Last modified 3/25/2016
+Last modified 3/31/2016
 
 Modifications:
 
@@ -225,11 +225,15 @@ pop $UninstLogAlwaysLog
   !macroend
  
 ;WriteUninstaller macro
-  !macro WriteUninstaller Path
-    StrCmp $UninstLogAlwaysLog "" 0 +2 ; if nonempty, don't check existence.
-    IfFileExists "${Path}" +3 ;if it exists we don't log it.
-    StrCmp $UninstLog "" +2
-      FileWrite $UninstLog "${Path}$\r$\n"
+!macro WriteUninstaller Path
+  ;path: path to uninstaller.
+  ;We always log this even if it exists because otherwise when installing over a previous install it doesn't get put in the log and $InstDir is not removed when uninstalled.
+    ;${IfNot} ${FileExists} "${Path}" ;if it exists we don't log it.
+    ${OrIf} $UninstLogAlwaysLog != "" ;unless $UninstLogAlwaysLog is true
+      ${If} $UninstLog != "" ;log is open
+	FileWrite $UninstLog "${Path}$\r$\n"
+      ${EndIf} ;uninstlog open
+    ;${EndIf} ;if does not exist or $UninstLogAlwaysLog
     WriteUninstaller "${Path}"
   !macroend
 
