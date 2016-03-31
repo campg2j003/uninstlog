@@ -1,13 +1,16 @@
 ===Documentation===
-(for version 0.1.0 dated 1/9/2016)
+Last updated 3/30/2016 (for version 0.1.1 dated 3/25/2016)
 
+This package contains two header files.  uninstlog.nsh provides the ability to uninstall only the installed files.  logging.nsh provides the ability to write the installer and uninstaller logs to a file.
+
+# uninstlog.nsh
 This header file supports the ability to uninstall only the installed files.
 
 It expects the following defines:
 REG_ROOT, REG_APP_PATH, and REG_UNINSTALL_PATH.  If either of the latter two are undefined these registry keys won't be deleted even if they appear in the log file.
 
 
-# To use:
+## To use:
 * At the top of your scrip !include at least one langstring header file and uninstlog.nsh:
 ```
 !include "uninstlog_enu.nsh"
@@ -39,7 +42,7 @@ In your uninstall section do:
 
 Note that this will push one entry on the stack for every entry in the log.
 
-# Macros
+## Macros
 The following commands are provided, most of them simple forms of the similar NSIS commands:
 * ${AddItem} Path --  adds a file or directory when the provided commands won't do the job.  Does not add the item if it exists, so you need to call this before the command that creates it.
 * ${AddItemAlways} -- Like AddItem but adds item even if it exists.
@@ -56,7 +59,7 @@ The following commands are provided, most of them simple forms of the similar NS
 * ${FileDated} -- same as ItemDated for the ${File} command.
 
 
-# Defines and variables
+## Defines and variables
 Uses the following additional defines:
 * UninstLog -- name of the log file, defaults to uninstall.log.  You can define this just before calling UNINSTLOG_OPENINSTALL and UNINSTLOG_UNINSTALL to change the name of the log file.  You could even create separate logs.  You would then need to do more than one UNINSTLOG_UNINSTALL for each log file.  The name will stay defined until you change it.
 * UNINSTLOGDSEP -- separator used to separate file path and date-size for ${FileDated} and $ItemDated} macros (|)
@@ -88,18 +91,59 @@ ${UnStrTok}
 
 (This was discovered by inspection in strfunc.nsh v1.09.)
 
-# A note about wildcards
+## A note about wildcards
 Although you can use wildcards in ${File}, ${Rename}, and ${CopyFiles}, it could be dangerous and is not recommended unless you are sure you know what you are doing.  Suppose you do `${File} "*.txt"` where the source directory has a few text files, but the directory into which they are installed already contains text files.  The value written to the log will be "*.txt", and this will cause the uninstaller to uninstall all of the .txt files in the folder, including the ones that were already installed.  You can't use wildcards at all with ${FileDated}, although there is no check for this.  (I need a way to run FindFirst/FindNext on the source system to do this.  See above for an alternative.)
 
 The project for which I modified this header file uses ${AddItem}, ${AddItemAlways}, ${AddItemDated}, ${File}, ${FileDated}, ${CreateDirectory}, ${CreateShortcut}, ${SetOutPath}, and ${WriteUninstaller}.  I have retained the other commands but I have not tested them much.
 
-# Bugs/enhancements
+## Bugs/enhancements
 
 * Issue with ${AddItemDated}: If ${AddItemDated} follows the command that creates its file then it won't log unless UninstLogAlwaysLog is on.  If it precedes the command, the date-size stamp will be empty because it doesn't exist yet.  It was not modified to always log regardless of the value of $UninstLogAlwaysLog to make it clear that it is set.
 * Issue with ${WriteReg...} macros: For these macros to work REG_APP_PATH and REG_UNINSTALL_PATH must be defined, and these are the only registry paths that can be written.  This means that you must define these and use them in the path of any ${WriteReg...} calls to make them be deleted.  If there were an installed file with the same name as these values that was installed but had been deleted before the uninstall, it could cause these keys to be deleted from the registry unintentionally.  (I presume that's why the uninstaller code checks for these values before removing them-- otherwise any file in the log that doesn't exist on the system when uninstalled would be interpreted as a registry key to delete.)
 * To do: make all macros, variables, and !defines defined by this header start with "UninstLog" to avoid name collisions with other header files.
 
-# Messages
+## Messages
 Note that starting in V0.1.0 the messages are in separate header files so that they can be localized:
 * uninstlog_enu.nsh -- English messages.
+
+# logging.nsh
+logging.nsh provides the following:
+* the ability to capture log messages generated before DetailPrint is active.
+* the ability to write the installer and uninstaller DetailPrint messages to a file.
+* the ability to log messages for a silent install or uninstall to a file.
+
+## Available Macros
+### Capturing DetailPrint Messages
+Messages written by DetailPrint in functions run before the start of the first section, such as those generated by .OnInit and page callback functions don't appear in the log window.  To capture them use these macros:
+
+
+```
+${StoreDetailPrintInit} ;before the first message
+${StoreDetailPrint} msg "message" ;as you would use DetailPrint
+...
+Section FirstInstallerSection
+${DetailPrintStored} ;DetailPrints the stored messages and clears the message cache.
+SectionEnd
+```
+
+To dump the installer log window to a file:
+```
+Push LogFileName
+call logging_DumpLog
+;or in uninstaller
+call un.logging_DumpLog
+```
+
+FileName is the fully qualified name of the log file.  Note that these functions will not capture anything for a silent install because the log window doesn't exist.
+
+For silent installs:
+```
+${StoreDetailPrintInit}
+...
+${logging_DetailPrint} msg ;does DetailPrint and ${StoreDetailPrint}
+...
+Push FileName
+call logging_Write ;or un.logging_Write
+```
+
 

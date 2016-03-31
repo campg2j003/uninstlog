@@ -4,7 +4,7 @@
 /*
 Logging: log to a file.
 
-Last Updated: 3/24/16
+Last Updated: 3/30/16
 
 */
 
@@ -13,25 +13,43 @@ Last Updated: 3/24/16
 
 ;-----
 ;Store DetailPrint entries from functions run before DetailPrint works.
-VAR DetailPrintStoreCache
+VAR DetailPrintStoreFileName ;name of temp file
+Var DetailPrintStoreHandle ;file handle
 
 !macro StoreDetailPrintInit
   ;Call this in .OnInit.
-  StrCpy $DetailPrintStoreCache ""
+  GetTempFileName $DetailPrintStoreFileName ;creates a file
+  FileOpen $DetailPrintStoreHandle $DetailPrintStoreFileName "w"
 !MacroEnd ;StoreDetailPrintInit
 !Define StoreDetailPrintInit "!InsertMacro StoreDetailPrintInit"
 
-;To print the accumulated messages, print DetailPrintStoreCache and then StrCpy DetailPrintStoreCache "", or invoke ${DetailPrintStored}.
+;To print the accumulated messages, invoke ${DetailPrintStored}.
 !macro StoreDetailPrint msg
   ;Add msg followed by a newline to the cache.
-  StrCpy $DetailPrintStoreCache "$DetailPrintStoreCache${msg}$\r$\n"
+  FileWrite $DetailPrintStoreHandle "${msg}$\r$\n"
 !MacroEnd ; StoreDetailPrint
 !Define StoreDetailPrint "!insertMacro StoreDetailPrint"
 
 !macro DetailPrintStored
   ;DetailPrints the cached messages and clears the cache.
-  DetailPrint "$DetailPrintStoreCache"
-  StrCpy $DetailPrintStoreCache ""
+  Push $0
+  FileClose $DetailPrintStoreHandle
+  FileOpen $DetailPrintStoreHandle $DetailPrintStoreFileName "r"
+  ${If} $DetailPrintStoreHandle <> 0
+  ${Do}
+    FileRead $DetailPrintStoreHandle $0
+    ${If} ${Errors}
+      ${ExitDo}
+    ${EndIf}
+    StrCpy $0 $0 -2 ;remove CRLF
+    DetailPrint $0
+  ${Loop}
+  FileClose $DetailPrintStoreHandle
+  Delete $DetailPrintStoreFileName
+  StrCpy $DetailPrintStoreFileName ""
+  StrCpy $DetailPrintStoreHandle 0
+  ${EndIf} ;opened file
+  Pop $0
 !MacroEnd ;DetailPrintStored
 !Define DetailPrintStored "!InsertMacro DetailPrintStored"
 
@@ -90,7 +108,6 @@ VAR DetailPrintStoreCache
     StrCmp $5 0 error
     FileSeek $5 0 END
   ${EndIf}
-  Sleep 3000 ; debug
   SendMessage $0 ${LVM_GETITEMCOUNT} 0 0 $6
   StrCpy $7 "no items"
   IntCmp $6 0 error
@@ -134,5 +151,30 @@ Function un.LOGGING_DumpLog
   ;TOS is file path.
   !InsertMacro LOGGING_DumpLog
 FunctionEnd ;un.LOGGING_DumpLog
+
+!macro logging_DetailPrint msg
+  DetailPrint "${msg}"
+  ${StoreDetailPrint} "${msg}"
+!MacroEnd ;logging_DetailPrint
+!Define logging_DetailPrint "!InsertMacro logging_DetailPrint"
+
+!macro logging_Write
+  ;Write contents of DetailPrintStoreCache to log file.
+  ;TOS=file name
+  ;Note that this will not append to an existing file
+  Exch $5
+  FileClose $DetailPrintStoreHandle
+  StrCpy $DetailPrintStoreHandle 0
+  Delete $5 ;in case one exists
+  Rename $DetailPrintStoreFileName $5
+  StrCpy $DetailPrintStoreFileName ""
+    Pop $5
+!MacroEnd ;logging_Write
+function logging_Write
+  !InsertMacro logging_Write
+  FunctionEnd ;logging_Write
+function un.logging_Write
+  !InsertMacro logging_Write
+  FunctionEnd ;un.logging_Write
 
 !EndIf ;LOGGING_INCLUDED

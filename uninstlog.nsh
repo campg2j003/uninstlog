@@ -2,8 +2,8 @@
 /*
 Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
-Version 0.1.0
-Last modified 1/13/2016
+Version 0.1.1
+Last modified 3/25/2016
 
 Modifications:
 
@@ -14,6 +14,7 @@ Modifications:
 !define UNINSTLOGDEBUG
 !include "strfunc.nsh"
 !include "filefunc.nsh"
+!include "logging.nsh"
 ;--------------------------------
 ; Configure UnInstall log to only remove what is installed
 ;-------------------------------- 
@@ -375,7 +376,8 @@ function un.UninstLogUninstall
   Pop $R0
  
   !ifdef UNINSTLOGDEBUG
-    DetailPrint "Read $R1 log entries" ; debug
+    ${Logging_DetailPrint} "Read $R1 log entries" ; debug
+    
   !endif
   LoopRead:
     StrCmp $R1 0 LoopDone
@@ -383,19 +385,19 @@ function un.UninstLogUninstall
  
     IfFileExists "$R0\*.*" 0 NotDir
       !ifdef UNINSTLOGDEBUG ; debug
-        DetailPrint "Attempting to remove directory $R0" ; debug
+        ${Logging_DetailPrint} "Attempting to remove directory $R0" ; debug
       !endif ; debug
       RMDir $R0  #is dir
       !ifdef UNINSTLOGDEBUG ; debug
         IfErrors 0 +2 ; debug
-          DetailPrint "Error after trying to remove directory $0" ; debug
+          ${Logging_DetailPrint} "Error after trying to remove directory $0" ; debug
       !endif ; debug
       Goto LoopNext
     NotDir:
     ${UnStrTok} $R2 $R0 ${UNINSTLOGDSEP} 1 0 ; date/size, 2nd token
     ${UnStrTok} $R0 "$R0" ${UNINSTLOGDSEP} 0 0 ;remove date/size from path.
     !ifdef UNINSTLOGDEBUG
-      DetailPrint "After separating time stamp, time stamp=$R2, file=$R0" ; debug
+      ${Logging_DetailPrint} "After separating time stamp, time stamp=$R2, file=$R0" ; debug
     !endif
     StrCmp $R2 "" NoDateSize ;Skip call if no timestamp
       push $0
@@ -406,20 +408,20 @@ function un.UninstLogUninstall
     NoDateSize:
     IfFileExists $R0 0 NotFile
       StrCmp $R2 "" NoDateSize2 ;If this log entry had no date-size, skip compare
-      !ifdef UNINSTLOGDEBUG
-        DetailPrint "UninstLog: file $0 has time stamp $1, entry stamp is $R2" ; debug
-      !endif
-      StrCmp $R2 $1 DateSizeMatch
-      push $R2 ; log entry stamp
-      call un.UninstLogShowDateSize
-      pop $R3 ; display of log entry stamp
-      push $1 ; current stamp
-      call un.UninstLogShowDateSize
-      pop $R4 ; current file stamp
+      ;!ifdef UNINSTLOGDEBUG
+        ;${Logging_DetailPrint} "UninstLog: file $0 has time stamp $1, entry stamp is $R2" ; debug
+      ;!endif
+      ${If} $R2 != $1
+	push $R2 ; log entry stamp
+	call un.UninstLogShowDateSize
+	pop $R3 ; display of log entry stamp
+	push $1 ; current stamp
+	call un.UninstLogShowDateSize
+	pop $R4 ; current file stamp
         MessageBox MB_YESNO $(UninstLogModified) IDNO NoDelete
-pop $2
-pop $1
-      DateSizeMatch:
+	pop $2
+	pop $1
+      ${EndIf} ;date/sizes do not match
       NoDateSize2:
       Delete $R0 #is file
       NoDelete:
