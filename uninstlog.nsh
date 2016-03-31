@@ -229,7 +229,7 @@ pop $UninstLogAlwaysLog
   ;path: path to uninstaller.
   ;We always log this even if it exists because otherwise when installing over a previous install it doesn't get put in the log and $InstDir is not removed when uninstalled.
     ;${IfNot} ${FileExists} "${Path}" ;if it exists we don't log it.
-    ${OrIf} $UninstLogAlwaysLog != "" ;unless $UninstLogAlwaysLog is true
+    ;${OrIf} $UninstLogAlwaysLog != "" ;unless $UninstLogAlwaysLog is true
       ${If} $UninstLog != "" ;log is open
 	FileWrite $UninstLog "${Path}$\r$\n"
       ${EndIf} ;uninstlog open
