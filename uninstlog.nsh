@@ -3,7 +3,7 @@
 Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
 Version 0.1.1
-Last modified 3/31/2016
+Last modified 4/4/2016
 
 Modifications:
 
@@ -384,6 +384,10 @@ function un.UninstLogUninstall
     
   !endif
   LoopRead:
+    ;VAR /global STACKSIZE ; debug
+    ;${stack::ns_size} $STACKSIZE ; debug
+    ;We expect the stack size to decrease by 1 each time through the loop.
+    ;${logging_DetailPrint} "  uninstlog uninstall: stack size = $STACKSIZE" ; debug
     StrCmp $R1 0 LoopDone
     Pop $R0 ; log entry
  
@@ -423,8 +427,6 @@ function un.UninstLogUninstall
 	call un.UninstLogShowDateSize
 	pop $R4 ; current file stamp
         MessageBox MB_YESNO $(UninstLogModified) IDNO NoDelete
-	pop $2
-	pop $1
       ${EndIf} ;date/sizes do not match
       NoDateSize2:
       Delete $R0 #is file
