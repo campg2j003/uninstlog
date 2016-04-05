@@ -346,9 +346,12 @@ pop $UninstLogAlwaysLog
   !endif
   !macroend
 
+  ;How to handle timestamp compare fail: "" ask, "d" delete all, "k" keep all.
+  VAR UNINSTLOG_HANDLE_TIMESTAMP_ERROR
 ; $0 -- name of uninstall log file.
 function un.UninstLogUninstall
   ;Can't uninstall if uninstall log is missing!
+  StrCpy $UNINSTLOG_HANDLE_TIMESTAMP_ERROR "" ;ask
   IfFileExists "$INSTDIR\$0" +3
     MessageBox MB_OK|MB_ICONSTOP "$(UninstLogMissing)"
       Abort
@@ -420,13 +423,23 @@ function un.UninstLogUninstall
         ;${Logging_DetailPrint} "UninstLog: file $0 has time stamp $1, entry stamp is $R2" ; debug
       ;!endif
       ${If} $R2 != $1
+	/* We no longer print timestamps.
 	push $R2 ; log entry stamp
 	call un.UninstLogShowDateSize
 	pop $R3 ; display of log entry stamp
 	push $1 ; current stamp
 	call un.UninstLogShowDateSize
 	pop $R4 ; current file stamp
-        MessageBox MB_YESNO $(UninstLogModified) IDNO NoDelete
+	*/
+        MessageBox MB_YESNO $(UninstLogModified) IDNO keepall
+	;delete all
+	StrCpy $UNINSTLOG_HANDLE_TIMESTAMP_ERROR "d"
+	GoTo afterkeep
+	keepall:
+	  StrCpy $UNINSTLOG_HANDLE_TIMESTAMP_ERROR "k"
+	afterkeep:
+	  StrCmp $UNINSTLOG_HANDLE_TIMESTAMP_ERROR "k" NoDelete
+	;Why were these here?  They were introduced in V0.0.2.  They throw away two log entries if we choose to delete.
       ${EndIf} ;date/sizes do not match
       NoDateSize2:
       Delete $R0 #is file
