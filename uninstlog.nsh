@@ -2,8 +2,8 @@
 /*
 Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
-Version 0.1.1
-Last modified 4/4/2016
+Version 0.1.2
+Last modified 4/5/2016
 
 Modifications:
 
@@ -423,21 +423,21 @@ function un.UninstLogUninstall
         ;${Logging_DetailPrint} "UninstLog: file $0 has time stamp $1, entry stamp is $R2" ; debug
       ;!endif
       ${If} $R2 != $1
-	/* We no longer print timestamps.
 	push $R2 ; log entry stamp
 	call un.UninstLogShowDateSize
 	pop $R3 ; display of log entry stamp
 	push $1 ; current stamp
 	call un.UninstLogShowDateSize
 	pop $R4 ; current file stamp
-	*/
-        MessageBox MB_YESNO $(UninstLogModified) IDNO keepall
+	${If} $UNINSTLOG_HANDLE_TIMESTAMP_ERROR == ""
+	MessageBox MB_YESNO $(UninstLogModified) IDNO keepall
 	;delete all
 	StrCpy $UNINSTLOG_HANDLE_TIMESTAMP_ERROR "d"
 	GoTo afterkeep
 	keepall:
 	  StrCpy $UNINSTLOG_HANDLE_TIMESTAMP_ERROR "k"
-	afterkeep:
+	  afterkeep:
+	    ${EndIf} ;ask 
 	  StrCmp $UNINSTLOG_HANDLE_TIMESTAMP_ERROR "k" NoDelete
 	;Why were these here?  They were introduced in V0.0.2.  They throw away two log entries if we choose to delete.
       ${EndIf} ;date/sizes do not match
