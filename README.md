@@ -1,10 +1,10 @@
 ===Documentation===
-Last updated 3/30/2016 (for version 0.1.1 dated 3/25/2016)
+Last updated 5/14/2016 (for version 0.1.2 dated 4/5/2016)
 
 This package contains two header files.  uninstlog.nsh provides the ability to uninstall only the installed files.  logging.nsh provides the ability to write the installer and uninstaller logs to a file.
 
 # uninstlog.nsh
-This header file supports the ability to uninstall only the installed files.
+This header file supports the ability to uninstall only the installed files.  It was adapted from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken August 3, 2011.
 
 It expects the following defines:
 REG_ROOT, REG_APP_PATH, and REG_UNINSTALL_PATH.  If either of the latter two are undefined these registry keys won't be deleted even if they appear in the log file.
@@ -43,6 +43,18 @@ In your uninstall section do:
 Note that this will push one entry on the stack for every entry in the log.
 
 ## Macros
+To start logging:
+```
+!insertmacro UNINSTLOG_OPENINSTALL
+```
+
+When finished logging:
+
+```
+!insertmacro UNINSTLOG_CLOSEINSTALL
+```
+
+
 The following commands are provided, most of them simple forms of the similar NSIS commands:
 * ${AddItem} Path --  adds a file or directory when the provided commands won't do the job.  Does not add the item if it exists, so you need to call this before the command that creates it.
 * ${AddItemAlways} -- Like AddItem but adds item even if it exists.
@@ -57,6 +69,16 @@ The following commands are provided, most of them simple forms of the similar NS
 * ${WriteRegDWORD} -- see ${WriteRegStr}
 * ${AddItemDated} -- same as AddItem but includes the date/time and size of the installed file so that the uninstaller can detect if files are modified.
 * ${FileDated} -- same as ItemDated for the ${File} command.
+
+
+In your uninstaller:
+```
+!insertmacro UNINSTLOG_UNINSTALL
+```
+
+This uninstalls all of the items recorded in the log.  If a file was logged with `${FileDated}` or `${AddItemCdated}`, and it has been modified since it was installed, a message asks whether to uninstall it.  Answering "yes" will remove all modified files.  Answering "no" will leave all such files.
+
+It is possible to create more than one log file.  See `testuninstlog.nsi` for an example.
 
 
 ## Defines and variables
@@ -105,6 +127,12 @@ The project for which I modified this header file uses ${AddItem}, ${AddItemAlwa
 ## Messages
 Note that starting in V0.1.0 the messages are in separate header files so that they can be localized:
 * uninstlog_enu.nsh -- English messages.
+* uninstlog_esn.nsh -- Spanish messages.
+
+
+If you add text that requires translation, please add it as a LangString.  Add the LangString definition to all language files, even if you don't have a translation for that language.
+
+See `testuninstlog.nsi` for example code.
 
 # logging.nsh
 logging.nsh provides the following:
