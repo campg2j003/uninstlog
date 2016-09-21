@@ -1,5 +1,5 @@
 ===Documentation===
-Last updated 5/14/2016 (for version 0.1.2 dated 4/5/2016)
+Last updated 2016-09-21 (for version 0.1.2 dated 2016-09-21)
 
 This package contains two header files.  uninstlog.nsh provides the ability to uninstall only the installed files.  logging.nsh provides the ability to write the installer and uninstaller logs to a file.
 

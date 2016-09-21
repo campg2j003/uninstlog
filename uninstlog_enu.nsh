@@ -1,6 +1,6 @@
 /*
-English messages for uninstlog.nsh V0.1.0 (updated 1/10/2016)
-This file last updated 1/10/16.
+English messages for uninstlog.nsh V0.1.0 (updated 2016-09-21)
+This file last updated 2016-09-21.
 */
 
 !ifndef __UNINSTLOG_ENU_INCLUDED

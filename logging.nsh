@@ -4,7 +4,7 @@
 /*
 Logging: log to a file.
 
-Last Updated: 3/30/16
+Last Updated: 2016-09-21
 
 */
 

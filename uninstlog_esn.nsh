@@ -1,7 +1,7 @@
 /*
-Spanish messages for uninstlog.nsh V0.1.0 (updated 1/10/2016)
-Translation of file uninstlog_enu.nsh last updated 1/10/16.
-This file last updated 1/12/16.
+Spanish messages for uninstlog.nsh V0.1.0 (updated 2016-09-21)
+Translation of file uninstlog_enu.nsh last updated 2016-09-21.
+This file last updated 2016-09-21.
 Translated by Fernando Gregoire.
 */
 
