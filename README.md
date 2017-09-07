@@ -1,5 +1,5 @@
 ===Documentation===
-Last updated 2016-09-21 (for version 0.1.2 dated 2016-09-21)
+Last updated 2017-09-07 (for version 0.1.2 dated 2016-09-21)
 
 This package contains two header files.  uninstlog.nsh provides the ability to uninstall only the installed files.  logging.nsh provides the ability to write the installer and uninstaller logs to a file.
 
@@ -128,6 +128,7 @@ The project for which I modified this header file uses ${AddItem}, ${AddItemAlwa
 Note that starting in V0.1.0 the messages are in separate header files so that they can be localized:
 * uninstlog_enu.nsh -- English messages.
 * uninstlog_esn.nsh -- Spanish messages.
+* uninstlog_deu.nsh -- German messages.
 
 
 If you add text that requires translation, please add it as a LangString.  Add the LangString definition to all language files, even if you don't have a translation for that language.
