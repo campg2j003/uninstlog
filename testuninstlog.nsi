@@ -17,7 +17,7 @@ LoadLanguageFile "${NSISDIR}\Contrib\Language files\French.nlf"
 !define REG_ROOT "HKLM"
 !define REG_UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\testuninstlog"
 !define SHORTCUTNAME "Uninstall testuninstlog"
-installdir "$PROGRAMFILES\testuninstlog"
+installdir "$LOCALAPPDATA\testuninstlog"
 OutFile "testuninstlog.exe"
 Name "Test Uninstlog.nsh"
 RequestExecutionLevel user
@@ -96,3 +96,41 @@ NotInstall2:
 !insertmacro UNINSTLOG_UNINSTALL
 End:
 sectionend
+
+Function .onInit
+
+	;Language selection dialog
+
+	Push ""
+	Push ${LANG_ENGLISH}
+	Push English
+	;Push ${LANG_DUTCH}
+	;Push Dutch
+	;Push ${LANG_FRENCH}
+	;Push French
+	;Push ${LANG_GERMAN}
+	;Push German
+	;Push ${LANG_KOREAN}
+	;Push Korean
+	;Push ${LANG_RUSSIAN}
+	;Push Russian
+	Push ${LANG_SPANISH}
+	Push Spanish
+	;Push ${LANG_SWEDISH}
+	;Push Swedish
+	;Push ${LANG_TRADCHINESE}
+	;Push "Traditional Chinese"
+	;Push ${LANG_SIMPCHINESE}
+	;Push "Simplified Chinese"
+	;Push ${LANG_SLOVAK}
+	;Push Slovak
+	;Push ${LANG_FINNISH}
+	;Push Finnish
+	Push A ; A means auto count languages
+	       ; for the auto count to work the first empty push (Push "") must remain
+	LangDLL::LangDialog "Installer Language" "Please select the language of the installer"
+
+	Pop $LANGUAGE
+	StrCmp $LANGUAGE "cancel" 0 +2
+		Abort
+FunctionEnd
