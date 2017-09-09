@@ -104,8 +104,8 @@ Function .onInit
 	;Push Dutch
 	;Push ${LANG_FRENCH}
 	;Push French
-	;Push ${LANG_GERMAN}
-	;Push German
+	Push ${LANG_GERMAN}
+	Push German
 	;Push ${LANG_KOREAN}
 	;Push Korean
 	;Push ${LANG_RUSSIAN}
