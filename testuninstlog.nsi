@@ -106,10 +106,10 @@ Function .onInit
 	Push English
 	;Push ${LANG_DUTCH}
 	;Push Dutch
-	;Push ${LANG_FRENCH}
-	;Push French
-	;Push ${LANG_GERMAN}
-	;Push German
+	Push ${LANG_FRENCH}
+	Push French
+	Push ${LANG_GERMAN}
+	Push German
 	;Push ${LANG_KOREAN}
 	;Push Korean
 	;Push ${LANG_RUSSIAN}
@@ -124,8 +124,8 @@ Function .onInit
 	;Push "Simplified Chinese"
 	;Push ${LANG_SLOVAK}
 	;Push Slovak
-	;Push ${LANG_FINNISH}
-	;Push Finnish
+	Push ${LANG_FINNISH}
+	Push Finnish
 	Push A ; A means auto count languages
 	       ; for the auto count to work the first empty push (Push "") must remain
 	LangDLL::LangDialog "Installer Language" "Please select the language of the installer"
