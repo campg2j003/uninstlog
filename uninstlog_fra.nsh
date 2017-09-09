@@ -9,7 +9,7 @@ This file last updated 2017-09-08.
 LangString UninstLogMissing ${LANG_FRENCH} "$0 pas trouvé!$\r$\nLa désinstallation ne peut pas continuer!"
 
 ;$R0 = file name, $R3 = log entry file stamp, $R4 = current file stamp.  File stamp is produced by  LangString UninstLogShowDateSize.
-LangString UninstLogModified ${LANG_FRENCH} "Le fichier $ R0 a été modifié depuis qu'il a été installé.  Voulez-vous le supprimer et tous les autres fichiers modifiés?$\r$\nOriginal: $R3$\r$\nActuel: $R4"
+LangString UninstLogModified ${LANG_FRENCH} "Le fichier $R0 a été modifié depuis qu'il a été installé.  Voulez-vous le supprimer et tous les autres fichiers modifiés?$\r$\nOriginal: $R3$\r$\nActuel: $R4"
 
 ;Displays a files timestamp and size.  $1 = timestamp, $2 = size in bytes.
 LangString UninstLogShowDateSize ${LANG_FRENCH} "$1 UTC $2 octets"

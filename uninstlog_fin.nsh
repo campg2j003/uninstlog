@@ -9,7 +9,7 @@ This file last updated 2017-09-08.
 LangString UninstLogMissing ${LANG_FINNISH} "$0 ei löydetty!$\r$\nAsennuksen poistaminen ei onnistu!"
 
 ;$R0 = file name, $R3 = log entry file stamp, $R4 = current file stamp.  File stamp is produced by  LangString UninstLogShowDateSize.
-LangString UninstLogModified ${LANG_FINNISH} "Tiedostoa $ R0 on muutettu, koska se on asennettu.  Haluatko poistaa sen ja kaikki muut muokatut tiedostot?$\r$\nAlkuperäinen: $R3$\r$\nNykyinen: $R4"
+LangString UninstLogModified ${LANG_FINNISH} "Tiedostoa $R0 on muutettu, koska se on asennettu.  Haluatko poistaa sen ja kaikki muut muokatut tiedostot?$\r$\nAlkuperäinen: $R3$\r$\nNykyinen: $R4"
 
 ;Displays a files timestamp and size.  $1 = timestamp, $2 = size in bytes.
 LangString UninstLogShowDateSize ${LANG_FINNISH} "$1 UTC $2 tavua"
