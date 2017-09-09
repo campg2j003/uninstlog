@@ -1,6 +1,6 @@
 /*
 French messages for uninstlog.nsh V0.1.0 (updated 2017-09-08)
-This file last updated 2016-09-08.
+This file last updated 2017-09-08.
 */
 
 !ifndef __UNINSTLOG_FRA_INCLUDED
