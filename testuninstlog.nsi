@@ -1,5 +1,6 @@
 /*
 7/24/12 Added section to test ${File} with wildcards.
+9/9/17  Adde section to test messages for localization.
 */
 
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
@@ -79,6 +80,27 @@ ${CreateDirectory} "$INSTDIR\wildcard" ;will be logged
 ${SetOutPath} "$INSTDIR\wildcard" ;will not be logged because it already exists
 ${File} "${NSISDIR}\include\" "*.nsh"
 !insertmacro UNINSTLOG_CLOSEINSTALL
+sectionend
+
+!macro TestLangString Name ShouldBe
+  MessageBox MB_OK "Testing ${Name}$\r$\nEnglish:$\r$\n${ShouldBe}$\r$\nTranslation:$\r$\n$(${Name})"
+!MacroEnd
+!define TestLangString "!insertmacro TestLangString"
+
+section /O "Test messages"
+  ;test Unin stLogMissing
+  StrCpy $0 "abc.txt"
+  ${TestLangString} UninstLogMissing "$0 not found!$\r$\nUninstallation cannot proceed!"
+  ;Displays a files timestamp and size.  $1 = timestamp, $2 = size in bytes.
+  StrCpy $1 "20170909140507"
+  StrCpy $2 "123"
+  ${TestLangString} UninstLogShowDateSize "$1 UTC $2 bytes"
+  StrCpy $R3 $(UninstLogShowDateSize)
+  StrCpy $1 "20170909140509"
+  StrCpy $2 "234"
+  StrCpy $R4 $(UninstLogShowDateSize)
+  StrCpy $R0 $0
+  ${TestLangString} UninstLogModified "File $R0 has been modified since it was installed.  Do you want to delete it and all other modified files?$\r$\nOriginal: $R3$\r$\nCurrent: $R4"
 sectionend
 
 section "uninstall"
