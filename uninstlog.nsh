@@ -2,8 +2,8 @@
 /*
 Adapted by GaryC from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken 8/3/11.
 
-Version 0.1.2
-Last modified 2016-09-21
+Version 0.1.3
+Last modified 2017-09-13
 
 Modifications:
 

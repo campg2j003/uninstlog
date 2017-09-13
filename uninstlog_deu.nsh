@@ -1,5 +1,5 @@
 /*
-German messages for uninstlog.nsh V0.1.0 (updated 2016-09-21)
+German messages for uninstlog.nsh V0.1.3 (updated 2017-09-13)
 Translation of file uninstlog_enu.nsh last updated 2016-09-21.
 This file last updated 2017-08-26.
 Translated by Michael Vogt.

@@ -1,5 +1,5 @@
 ===Documentation===
-Last updated 2017-09-07 (for version 0.1.2 dated 2016-09-21)
+Last updated 2017-09-13 (for version 0.1.3 dated 2017-09-13)
 
 This package contains two header files.  uninstlog.nsh provides the ability to uninstall only the installed files.  logging.nsh provides the ability to write the installer and uninstaller logs to a file.
 
@@ -11,7 +11,7 @@ REG_ROOT, REG_APP_PATH, and REG_UNINSTALL_PATH.  If either of the latter two are
 
 
 ## To use:
-* At the top of your scrip !include at least one langstring header file and uninstlog.nsh:
+* At the top of your script !include at least one langstring header file and uninstlog.nsh:
 ```
 !include "uninstlog_enu.nsh"
 !include "uninstlog.nsh"
@@ -129,6 +129,8 @@ Note that starting in V0.1.0 the messages are in separate header files so that t
 * uninstlog_enu.nsh -- English messages.
 * uninstlog_esn.nsh -- Spanish messages.
 * uninstlog_deu.nsh -- German messages.
+* uninstlog_fin.nsh -- Finnish messages.
+* uninstlog_fra.nsh -- French messages.
 
 
 If you add text that requires translation, please add it as a LangString.  Add the LangString definition to all language files, even if you don't have a translation for that language.
