@@ -1,6 +1,7 @@
 /*
 7/24/12 Added section to test ${File} with wildcards.
 9/9/17  Adde section to test messages for localization.
+9/13/17 Replaced sections.nsh with strfunc.nsh, per report that sections.nsh isn't in standard NSIS install.
 */
 
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
@@ -44,7 +45,7 @@ section /O "Optional stuff, copy and rename"
 ${CreateDirectory} "$INSTDIR\optional" ;will be logged
 ${SetOutPath} "$INSTDIR\optional" ;will not be logged because it already exists
 ${AddItem} "$OUTDIR\something.nsh"
-File /oname=something.nsh "${NSISDIR}\include\sections.nsh"
+File /oname=something.nsh "${NSISDIR}\include\strfunc.nsh"
 ${CopyFiles} "$OUTDIR\something.nsh" "$OUTDIR\somethingelse.nsh" ;will be logged, but...
 ${Rename} "$OUTDIR\somethingelse.nsh" "$OUTDIR\somethingelse.dat"
 !insertmacro UNINSTLOG_CLOSEINSTALL
