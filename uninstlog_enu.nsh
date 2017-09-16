@@ -1,4 +1,4 @@
-/*
+﻿/*
 English messages for uninstlog.nsh V0.1.3 (updated 2017-09-13)
 This file last updated 2016-09-21.
 */

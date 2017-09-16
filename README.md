@@ -1,7 +1,9 @@
 ===Documentation===
-Last updated 2017-09-13 (for version 0.1.3 dated 2017-09-13)
+Last updated 2017-09-16 (for version 0.1.4 dated 2017-09-16)
 
 This package contains two header files.  uninstlog.nsh provides the ability to uninstall only the installed files.  logging.nsh provides the ability to write the installer and uninstaller logs to a file.
+
+This package requires NSIS 3.0 or later and has been tested with v3.02.1.  Although the code provides for using ANSI or Unicode, the language files are encoded as UTF-8.
 
 # uninstlog.nsh
 This header file supports the ability to uninstall only the installed files.  It was adapted from code from http://nsis.sourceforge.net/Uninstall_only_installed_files by Afrow UK with modifications by others, taken August 3, 2011.
@@ -132,6 +134,7 @@ Note that starting in V0.1.0 the messages are in separate header files so that t
 * uninstlog_fin.nsh -- Finnish messages.
 * uninstlog_fra.nsh -- French messages.
 
+All language files are UTF-8.
 
 If you add text that requires translation, please add it as a LangString.  Add the LangString definition to all language files, even if you don't have a translation for that language.
 

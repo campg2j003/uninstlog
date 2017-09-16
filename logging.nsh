@@ -4,7 +4,7 @@
 /*
 Logging: log to a file.
 
-Last Updated: 2016-09-21
+Last Updated: 2017-09-16
 
 */
 
@@ -53,28 +53,49 @@ Var DetailPrintStoreHandle ;file handle
 !MacroEnd ;DetailPrintStored
 !Define DetailPrintStored "!InsertMacro DetailPrintStored"
 
+!macro LOGGING_defineifndef switches name rest
+  ;Usage: !{LOGGING_defineifndef} /math defname "val1 + val2"
+  ;If there are no switches then specify "".  If there are more than switch enclose them in quotes.
+  !ifndef ${name}
+    !define ${switches} ${name} ${rest}
+  !EndIf
+!MacroEnd
+!define LOGGING_defineifndef "!InsertMacro LOGGING_defineifndef"
+
 ;-----
-;I use these in the file I made logging.nsh for.  There should be a better way to handle this.
-!IfNDef LVM_GETITEMCOUNT
-  ;Assume that if LVM_GETITEMCOUNT is defined, then the others are also defined.
-;!define LVM_FIRST           0x1000
-!define /math LVM_GETITEMCOUNT ${LVM_FIRST} + 4
-!define /math LVM_GETITEMTEXTA ${LVM_FIRST} + 45
+;!define /ifndef LVM_FIRST           0x1000
+${LOGGING_defineifndef} /math LVM_GETITEMCOUNT "${LVM_FIRST} + 4"
+${LOGGING_defineifndef} /math LVM_GETITEMTEXTA "${LVM_FIRST} + 45"
 ;We don't need these, but include them so if we're using a list view we can just test the first one and assume they're all there.
-!define /math LVM_GETITEMTEXTW ${LVM_FIRST} + 115
-!define LVM_GETUNICODEFORMAT 0x2006
-!define /math LVM_GETITEMSTATE ${LVM_FIRST} + 44
-!define /math LVM_SETITEMSTATE ${LVM_FIRST} + 43
-!define /math LVM_GETITEMA ${LVM_FIRST} + 5
-!define /math LVM_GETITEMW ${LVM_FIRST} + 75
-!define /math LVM_SETITEMA ${LVM_FIRST} + 6
-!define /math LVM_INSERTITEMA ${LVM_FIRST} + 7
-!define /math LVM_INSERTITEMW ${LVM_FIRST} + 77
-!define /math LVM_INSERTCOLUMNA ${LVM_FIRST} + 27
-!define /math LVM_INSERTCOLUMNW ${LVM_FIRST} + 97
-!define /math LVM_GETEXTENDEDLISTVIEWSTYLE ${LVM_FIRST} + 55
-!define /math LVM_SETEXTENDEDLISTVIEWSTYLE ${LVM_FIRST} + 54 ; wparam is mask, lparam is style, returns old style
-!EndIf ;NDef LVM_GETITEMCOUNT
+${LOGGING_defineifndef} "/math " LVM_GETITEMTEXTW "${LVM_FIRST} + 115"
+${LOGGING_defineifndef} "" LVM_GETUNICODEFORMAT "0x2006"
+${LOGGING_defineifndef} "/math " LVM_GETITEMSTATE "${LVM_FIRST} + 44"
+${LOGGING_defineifndef} "/math " LVM_SETITEMSTATE "${LVM_FIRST} + 43"
+${LOGGING_defineifndef} "/math " LVM_GETITEMA "${LVM_FIRST} + 5"
+${LOGGING_defineifndef} "/math " LVM_GETITEMW "${LVM_FIRST} + 75"
+${LOGGING_defineifndef} "/math " LVM_SETITEMA "${LVM_FIRST} + 6"
+${LOGGING_defineifndef} "/math " LVM_INSERTITEMA "${LVM_FIRST} + 7"
+${LOGGING_defineifndef} "/math " LVM_INSERTITEMW "${LVM_FIRST} + 77"
+${LOGGING_defineifndef} "/math " LVM_INSERTCOLUMNA "${LVM_FIRST} + 27"
+${LOGGING_defineifndef} "/math " LVM_INSERTCOLUMNW "${LVM_FIRST} + 97"
+${LOGGING_defineifndef} "/math " LVM_GETEXTENDEDLISTVIEWSTYLE "${LVM_FIRST} + 55"
+${LOGGING_defineifndef} "/math " LVM_SETEXTENDEDLISTVIEWSTYLE "${LVM_FIRST} + 54 ; wparam is mask, lparam is style, returns old style"
+
+;Adapted from winmessages.nsh from NSIS 3.02.1
+!macro _LOGGING_DEFAW d
+!ifdef NSIS_UNICODE
+${LOGGING_defineifndef} "" ${d} "${${d}W}"
+!else
+${LOGGING_defineifndef} "" ${d} "${${d}A}"
+!endif
+!macroend
+!define _LOGGING_DEFAW '!insertmacro _LOGGING_DEFAW '
+
+${_LOGGING_DEFAW} LVM_GETITEMTEXT
+${_LOGGING_DEFAW} LVM_GETITEM
+${_LOGGING_DEFAW} LVM_SETITEM
+${_LOGGING_DEFAW} LVM_INSERTITEM
+${_LOGGING_DEFAW} LVM_INSERTCOLUMN
 
 !macro LOGGING_DumpLog
   ;Dump log window to a file.  Does not work for silent installs.
@@ -117,8 +138,13 @@ Var DetailPrintStoreHandle ;file handle
   System::Call "*(i, i, i, i, i, i, i, i, i) i \
       (0, 0, 0, 0, 0, r3, ${NSIS_MAX_STRLEN}) .r1"
   loop: StrCmp $2 $6 done
+  !ifdef NSIS_UNICODE
+  System::Call "User32::SendMessageW(i, i, i, i) i \
+      ($0, ${LVM_GETITEMTEXT}, $2, r1)"
+  !else
   System::Call "User32::SendMessageA(i, i, i, i) i \
-      ($0, ${LVM_GETITEMTEXTA}, $2, r1)"
+      ($0, ${LVM_GETITEMTEXT}, $2, r1)"
+  !EndIf
   System::Call "*$3(&t${NSIS_MAX_STRLEN} .r4)"
   FileWrite $5 "$4$\r$\n"
   IntOp $2 $2 + 1
@@ -168,7 +194,7 @@ FunctionEnd ;un.LOGGING_DumpLog
   Delete $5 ;in case one exists
   Rename $DetailPrintStoreFileName $5
   StrCpy $DetailPrintStoreFileName ""
-    Pop $5
+  Pop $5
 !MacroEnd ;logging_Write
 function logging_Write
   !InsertMacro logging_Write

@@ -2,8 +2,11 @@
 7/24/12 Added section to test ${File} with wildcards.
 9/9/17  Adde section to test messages for localization.
 9/13/17 Replaced sections.nsh with strfunc.nsh, per report that sections.nsh isn't in standard NSIS install.
+9/16/17  Added test for LOGGING_DumpLog.
+9/16/17 This is the Unicode version.
 */
 
+Unicode true
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\Spanish.nlf"
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\German.nlf"
@@ -16,17 +19,18 @@ LoadLanguageFile "${NSISDIR}\Contrib\Language files\French.nlf"
 !include "uninstlog_fin.nsh"
 !include "uninstlog_fra.nsh"
 !include "uninstlog.nsh"
+!include "logging.nsh"
 !define REG_ROOT "HKLM"
 !define REG_UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\testuninstlog"
-!define SHORTCUTNAME "Uninstall testuninstlog"
-installdir "$LOCALAPPDATA\testuninstlog"
-OutFile "testuninstlog.exe"
-Name "Test Uninstlog.nsh"
+!define SHORTCUTNAME "Uninstall testuninstlog_unicode"
+installdir "$LOCALAPPDATA\testuninstlog_unicode"
+OutFile "testuninstlog_unicode.exe"
+Name "Test Uninstlog.nsh (Unicode)"
 RequestExecutionLevel user
 ShowInstDetails show
 ShowUninstDetails show
 
-ComponentText "This demonstrates the uninstlog.nsh header file which provides logging of installed files.  File uninstlog.nsh has a date stamp.  The shortcut ${SHORTCUTNAME} on the desktop will uninstall this test."
+ComponentText "This demonstrates the uninstlog.nsh header file which provides logging of installed files.  File uninstlog.nsh has a date stamp.  The shortcut ${SHORTCUTNAME} on the desktop will uninstall this test.  This is a Unicode installer."
 page components
 page Directory
 page InstFiles
@@ -106,6 +110,12 @@ section /O "Test messages"
   StrCpy $R4 $(UninstLogShowDateSize)
   StrCpy $R0 $0
   ${TestLangString} UninstLogModified "File $R0 has been modified since it was installed.  Do you want to delete it and all other modified files?$\r$\nOriginal: $R3$\r$\nCurrent: $R4"
+sectionend
+
+section /O "Test dumplog"
+DetailPrint "Testing dumplog."
+push "$INSTDIR\installer.log"
+call LOGGING_DumpLog
 sectionend
 
 section "uninstall"
