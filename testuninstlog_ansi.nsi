@@ -22,8 +22,8 @@ LoadLanguageFile "${NSISDIR}\Contrib\Language files\French.nlf"
 !define REG_UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\testuninstlog"
 !define SHORTCUTNAME "Uninstall testuninstlog"
 installdir "$LOCALAPPDATA\testuninstlog"
-OutFile "testuninstlog.exe"
-Name "Test Uninstlog.nsh"
+OutFile "testuninstlog_ansi.exe"
+Name "Test Uninstlog.nsh (ANSI)"
 RequestExecutionLevel user
 ShowInstDetails show
 ShowUninstDetails show

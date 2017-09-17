@@ -22,9 +22,9 @@ LoadLanguageFile "${NSISDIR}\Contrib\Language files\French.nlf"
 !include "logging.nsh"
 !define REG_ROOT "HKLM"
 !define REG_UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\testuninstlog"
-!define SHORTCUTNAME "Uninstall testuninstlog_unicode"
-installdir "$LOCALAPPDATA\testuninstlog_unicode"
-OutFile "testuninstlog_unicode.exe"
+!define SHORTCUTNAME "Uninstall testuninstlog"
+installdir "$LOCALAPPDATA\testuninstlog"
+OutFile "testuninstlog.exe"
 Name "Test Uninstlog.nsh (Unicode)"
 RequestExecutionLevel user
 ShowInstDetails show
